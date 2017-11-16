@@ -2,7 +2,7 @@
  * @Author: JackyFu 
  * @Date: 2017-11-16 14:37:17 
  * @Last Modified by: JackyFu
- * @Last Modified time: 2017-11-16 18:04:34
+ * @Last Modified time: 2017-11-16 18:23:49
  */
 
 let ui = require("ui");
@@ -44,6 +44,10 @@ cc.Class({
 
     on_click_close_all: function () {
         ui.close_all();
+    },
+
+    on_click_return: function () {
+        cc.director.loadScene("game");
     },
 
     update: function () {
