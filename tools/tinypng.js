@@ -1,3 +1,10 @@
+/*
+ * @Author: JackyFu 
+ * @Date: 2017-11-16 14:03:28 
+ * @Last Modified by:   JackyFu 
+ * @Last Modified time: 2017-11-16 14:03:28 
+ */
+
 var fs = require('fs');
 var path = require('path');
 var tinify = require("tinify");

@@ -1,8 +1,8 @@
 /*
  * @Author: JackyFu 
  * @Date: 2017-11-15 17:44:22 
- * @Last Modified by:   JackyFu 
- * @Last Modified time: 2017-11-15 17:44:22 
+ * @Last Modified by: JackyFu
+ * @Last Modified time: 2017-11-16 17:38:11
  */
 
 let ui = cc.Class({
@@ -14,7 +14,8 @@ let ui = cc.Class({
     },
 
     init: function () {
-        //includes ui_nodes & popup_nodes
+        //只负责管理 ui_nodes 和 popup_nodes
+        //主要用于窗口关闭
         this.ui_stack = [];
     },
 

@@ -1,8 +1,8 @@
 /*
  * @Author: JackyFu 
  * @Date: 2017-11-15 17:56:52 
- * @Last Modified by:   JackyFu 
- * @Last Modified time: 2017-11-15 17:56:52 
+ * @Last Modified by: JackyFu
+ * @Last Modified time: 2017-11-16 14:15:46
  */
 
 let constant = {};
@@ -17,7 +17,7 @@ constant.WINDOW_TYPE = {
     BASE: 0,
     UI: 1,
     POPUP: 2,
-    TIP: 3,
+    TIP: 3
 };
 
 constant.WINDOW_ZINDEX = {

@@ -1,3 +1,10 @@
+/*
+ * @Author: JackyFu 
+ * @Date: 2017-11-16 14:02:33 
+ * @Last Modified by:   JackyFu 
+ * @Last Modified time: 2017-11-16 14:02:33 
+ */
+
 let fs = require('fs');
 let path = require('path');
 

@@ -1,4 +1,9 @@
-#!/usr/bin/env node
+/*
+ * @Author: JackyFu 
+ * @Date: 2017-11-16 14:03:07 
+ * @Last Modified by:   JackyFu 
+ * @Last Modified time: 2017-11-16 14:03:07 
+ */
 
 var fs      = require("fs");
 var path    = require("path");
@@ -103,5 +108,3 @@ walk(RESOURCES_DIR, function(item, enter_dir) {
 lines.push("};");
 
 fs.writeFileSync(RES_FILE_PATH, lines.join("\n"));
-
-process.exit(0);
