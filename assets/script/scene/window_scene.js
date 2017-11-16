@@ -2,7 +2,7 @@
  * @Author: JackyFu 
  * @Date: 2017-11-16 14:37:17 
  * @Last Modified by: JackyFu
- * @Last Modified time: 2017-11-16 17:58:45
+ * @Last Modified time: 2017-11-16 18:04:34
  */
 
 let ui = require("ui");
@@ -47,7 +47,7 @@ cc.Class({
     },
 
     update: function () {
-        let str_stacks = '';
+        let str_stacks = '窗口信息日志: \n\n';
         let base_nodes = [];
         let ui_component = this.node.getComponent("ui_component");
         str_stacks += `Base: \n`
