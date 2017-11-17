@@ -2,10 +2,11 @@
  * @Author: JackyFu 
  * @Date: 2017-11-17 10:38:36 
  * @Last Modified by: JackyFu
- * @Last Modified time: 2017-11-17 15:39:08
+ * @Last Modified time: 2017-11-17 15:57:12
  */
 
 let network = require("network");
+let tips = require("tips");
 
 const URL = "http://127.0.0.1:8080/";
 const GET_REQ_MSG_NAME = "get_request";
@@ -21,6 +22,7 @@ cc.Class({
 
     // use this for initialization
     onLoad: function () {
+        tips.show("请先启动server目录下的index.js文件");
     },
 
     onEnable: function () {
@@ -80,6 +82,10 @@ cc.Class({
     },
 
     on_click_clear_log: function () {
-        this.label_network_log.string = "";
-    }
+        this.label_network_log.string = "网络请求日志：";
+    },
+
+    on_click_return: function () {
+        cc.director.loadScene("game");
+    },
 });

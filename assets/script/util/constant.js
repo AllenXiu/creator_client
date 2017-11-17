@@ -2,14 +2,14 @@
  * @Author: JackyFu 
  * @Date: 2017-11-15 17:56:52 
  * @Last Modified by: JackyFu
- * @Last Modified time: 2017-11-16 14:15:46
+ * @Last Modified time: 2017-11-17 15:58:03
  */
 
 let constant = {};
 
 constant.DESIGN_RESOLUTION = {
-    width: 1280,
-    height: 720
+    width: 960,
+    height: 640
 };
 
 constant.WINDOW_TYPE = {
