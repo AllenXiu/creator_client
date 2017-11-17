@@ -1,17 +1,13 @@
+import { disconnect } from "cluster";
+import { unwatchFile } from "fs";
+
 /*
  * @Author: JackyFu 
  * @Date: 2017-11-15 17:43:53 
  * @Last Modified by: JackyFu
- * @Last Modified time: 2017-11-15 18:14:33
+ * @Last Modified time: 2017-11-17 15:44:00
  */
 
-let proto = null;
-let tips  = null;
-let utils = null;
-
-let network_msg_list = [];
-let URL = "http://www.google.com/";
- 
 let network = cc.Class({
     extends: require("logic"),
 
@@ -20,36 +16,30 @@ let network = cc.Class({
     },
 
     init_modules: function () {
-        proto = require("proto");
-        tips  = require("tips");
-        utils = require("utils");
     },
 
-    init: function () {
-        this.ip = "";
+    init: function (ip, port) {
+        this.ip = ip + ":" + port;
         this.sio = null;
-        this.isPinging = false;
-        this.fnDisconnect = null;
-        this.loading_message_id = -1;
     },
 
-    connect: function(_ip,fnConnect,fnError) {
+    connect: function (success_cb, failure_cb) {
         let opts = {
-            'reconnection':false,
+            'reconnection': false,
             'force new connection': true,
-            'transports':['websocket', 'polling']
+            'transports': ['websocket', 'polling']
         };
 
-        this.sio = window.io.connect(_ip, opts);
-        
-        this.sio.on('reconnect',() => {
+        this.sio = window.io.connect(this.ip, opts);
+
+        this.sio.on('reconnect', () => {
             console.log('reconnection');
         });
 
         this.sio.on('connect', (data) => {
-            cc.log("connect ok");
+            console.log("connect ok");
             this.sio.connected = true;
-            fnConnect(data);
+            success_cb && success_cb(data);
         });
 
         this.sio.on('disconnect', (data) => {
@@ -58,8 +48,9 @@ let network = cc.Class({
             this.close();
         });
 
-        this.sio.on('connect_failed', () => {
+        this.sio.on('connect_failed', (data) => {
             console.log('connect_failed');
+            failure_cb && failure_cb(data);
         });
 
         this.sio.on('data', (data) => {
@@ -67,119 +58,66 @@ let network = cc.Class({
         });
     },
 
-    handle_data: function (data) {
-        if(typeof(data) === "string"){
-            if (cc.sys.isNative) {
-                data = data.substring(1, data.length - 1);
+    handle_data: function (msg) {
+        if (typeof (msg) !== "string") {
+            console.log("接收到的网络数据不是字符串");
+        }
+        try {
+            msg = JSON.parse(msg);
+            if (msg && msg.msg_name && msg.msg_data) {
+                console.log("[net message receive]", msg.msg_name, msg.msg_data);
+                this.emit(msg.msg_name, msg);
+            } else {
+                console.log("缺少 msg_name 或者 msg_data 字段");
             }
-            let msg_arr = data.split("&");
-            let msg_data = {};
-            for(let i = 0; i < msg_arr.length; i++){
-                let item_arr = msg_arr[i].split("=");
-                if (item_arr[0] === "body") {
-                    if (cc.sys.isNative) {
-                        item_arr[1] = "\"" + item_arr[1] + "\"";
-                    }
-                    msg_data[item_arr[0]] = JSON.parse(item_arr[1]);
-                }else {
-                    msg_data[item_arr[0]] = item_arr[1];
-                }
-            }
-            if (this.loading_message_id + 1 == msg_data.messageId) {
-                this.emit("hide_loading_node");
-            }
-            cc.log("net message back str...",proto[msg_data.messageId], JSON.stringify(msg_data));
-            if(msg_data.respCode == 1){
-                let _msg_data_body = msg_data.body;
-                if (cc.sys.isNative) {
-                    _msg_data_body = JSON.parse(msg_data.body)
-                }
-                this.emit(proto[msg_data.messageId], _msg_data_body);
-            }
-            else{
-                if(msg_data.messageId == proto.battle_query + 1){
-                    this.emit(proto[msg_data.messageId],null);
-                }
-
-                if (proto.error_code[msg_data.respCode]) {
-                    tips.show(proto.error_code[msg_data.respCode]);
-                }else {
-                    tips.show("错误代码：" + msg_data.respCode);
-                }
-
-                cc.log("message error respCode =",msg_data.respCode);
-            }
-            if(network_msg_list.length > 0){
-                this._send();
-            }
+        } catch (error) {
+            console.log(error);
         }
     },
 
-    send: function(data, is_show_loading, event){
-        if(this.sio.connected){
+    send: function (msg, event) {
+        if (this.sio && this.sio.connected) {
             event = event ? event : "data";
-            is_show_loading = is_show_loading || false;
-            if( data !== null && (typeof(data) === "object")){
-                let data_str = "";
-                if (data) {
-                    for (let key in data) {
-                        let arg = key + "=" ;
-                        arg +=  typeof(data[key]) === "object" ? JSON.stringify(data[key]):data[key];
-                        data_str += arg + "&";
-                    }
-                }
-                data_str = data_str.substring(0, data_str.length - 1);
-                // cc.log("message send", data.messageId ,data_str);
-
-                if (event === "data") {
-                    network_msg_list.push({message:data_str, message_id: data.messageId, is_show_loading: is_show_loading});
-                    this._send();
-                }
-                else{
-                    this.sio.emit(event,data_str);
-                    if (is_show_loading) {
-                        this.loading_message_id = data.messageId;
-                        this.emit("show_loading_node");
-                    }
-                }
+            if (msg === null || (typeof (msg) != "object")) {
+                console.log("发送数据异常");
+                return false;
             }
+            if (!msg.msg_name || !msg.msg_data) {
+                console.log("缺少 msg_name 或者 msg_data 字段");
+                return false;
+            }
+            let str_data = JSON.stringify(msg);
+            console.log("[net message send]", msg.msg_name, msg.msg_data);
+            this.sio.emit("data", str_data);
+            return true;
         }
-        else{
-            cc.log("socket-io no connect");
-        }
-    },
-
-    _send: function () {
-        let msg = network_msg_list.shift();
-        if (!msg){
-            cc.log("no msg in list");
-            return;
-        }
-        cc.log("net message send", msg.message_id, msg.message);
-        this.sio.emit("data",msg.message);
-        if (msg.is_show_loading) {
-            this.loading_message_id = msg.message_id;
-            this.emit("show_loading_node");
+        else {
+            console.log("socket-io no connect");
+            return false;
         }
     },
 
-    close: function(){
+    set_disconnect_cb: function (disconnect_cb) {
+        this.disconnect_cb = disconnect_cb;
+    },
+
+    close: function () {
         console.log('close');
-        if(this.sio && this.sio.connected){
+        if (this.sio && this.sio.connected) {
             this.sio.connected = false;
             this.sio.disconnect();
             this.sio = null;
         }
-        if(this.fnDisconnect){
-            this.fnDisconnect();
-            this.fnDisconnect = null;
+        if (this.disconnect_cb) {
+            this.disconnect_cb();
+            this.disconnect_cb = null;
         }
     },
 
     // http request
-    get: function (msg_name, sub_url, args) {
+    get: function (msg_name, url, args) {
         //set arguments with <URL>?xxx=xxx&yyy=yyy
-        let url = URL + sub_url + "/";
+        url += "/";
         if (args) {
             url += "?";
             for (let key in args) {
@@ -190,29 +128,25 @@ let network = cc.Class({
             }
         }
         url = url.substring(0, url.length - 1);
-
         let xhr = cc.loader.getXMLHttpRequest();
         xhr.open("GET", url, true);
-        xhr.onreadystatechange = function () {
-            cc.eventManager.dispatchCustomEvent("hide_loading");
+        xhr.onreadystatechange = () => {
             if (xhr.readyState === 4 && (xhr.status >= 200 && xhr.status <= 207)) {
                 // let httpStatus = xhr.statusText;
                 let response = xhr.responseText;
-                utils.log("Get 接收:");
-
+                console.log(`Get 接收: ${response}`);
                 try {
                     this.emit(msg_name + "_ret", JSON.parse(response));
-                }catch (e){
-                    cc.log(e);
+                } catch (e) {
+                    console.log(e);
                 }
             }
-        }.bind(this);
+        };
         xhr.send();
-        utils.log("Get 请求: " + url);
+        console.log("Get 请求: " + url);
     },
 
-    post: function (msg_name, sub_url, args) {
-        let url = URL + sub_url;
+    post: function (msg_name, url, args) {
         let data = "";
         if (args) {
             for (let key in args) {
@@ -226,21 +160,20 @@ let network = cc.Class({
         let xhr = cc.loader.getXMLHttpRequest();
         xhr.open("POST", url);
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-
-        xhr.onreadystatechange = function () {
+        xhr.onreadystatechange = () => {
             if (xhr.readyState === 4 && (xhr.status >= 200 && xhr.status <= 207)) {
                 // let httpStatus = xhr.statusText;
                 let response = xhr.responseText;
-                cc.log("Post 接收:");
+                console.log(`Post 接收: ${response}`);
                 try {
                     this.emit(msg_name + "_ret", JSON.parse(response));
-                }catch (e) {
-                    cc.log(e);
+                } catch (e) {
+                    console.log(e);
                 }
             }
-        }.bind(this);
+        };
         xhr.send(data);
-        utils.log("Post 请求: " + url);
+        console.log("Post 请求: " + url);
     },
 });
 
