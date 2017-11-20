@@ -1,0 +1,4 @@
+{
+	"96000":{"id":96000, "property":"atc", "property_value":[22,27], "property_percent":[24,39], "icon":[96100,96102], "name":["雷霆之怒","真·雷霆之怒"], "quality":[4,5], "cost_type":[[62001,62000],[62001,62000]], "cost_count":[[0,1],[1,1]]},
+	"96001":{"id":96001, "property":"def", "property_value":[23,28], "property_percent":[25,40], "icon":[96101,96103], "name":["时空之轮","真·时空之轮"], "quality":[4,5], "cost_type":[[62001,62000],[62001,62000]], "cost_count":[[0,1],[1,1]]}
+}
