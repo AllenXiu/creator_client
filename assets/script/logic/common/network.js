@@ -2,7 +2,7 @@
  * @Author: JackyFu 
  * @Date: 2017-11-15 17:43:53 
  * @Last Modified by: JackyFu
- * @Last Modified time: 2017-11-17 15:44:00
+ * @Last Modified time: 2017-12-04 09:32:12
  */
 
 let network = cc.Class({
@@ -128,15 +128,30 @@ let network = cc.Class({
         let xhr = cc.loader.getXMLHttpRequest();
         xhr.open("GET", url, true);
         xhr.onreadystatechange = () => {
-            if (xhr.readyState === 4 && (xhr.status >= 200 && xhr.status <= 207)) {
-                // let httpStatus = xhr.statusText;
-                let response = xhr.responseText;
-                console.log(`Get 接收: ${response}`);
-                try {
-                    this.emit(msg_name + "_ret", JSON.parse(response));
-                } catch (e) {
-                    console.log(e);
+            if (xhr.readyState === 4) {
+                if (xhr.status >= 200 && xhr.status <= 207) {
+                    // let httpStatus = xhr.statusText;
+                    let response = xhr.responseText;
+                    console.log(`Get 接收: ${response}`);
+                    try {
+                        this.emit(msg_name + "_ret", JSON.parse(response));
+                    } catch (e) {
+                        this.emit(msg_name + "_error_ret");
+                        console.log(e);
+                    }
+                } else {
+                    this.emit(msg_name + "_error_ret");
                 }
+            }
+        };
+        xhr.onerror = () => {
+            if (cc.sys.isNative) {
+                this.emit(msg_name + "_error_ret");
+            }
+        };
+        xhr.ontimeout = () => {
+            if (cc.sys.isNative) {
+                this.emit(msg_name + "_error_ret");
             }
         };
         xhr.send();
@@ -158,15 +173,30 @@ let network = cc.Class({
         xhr.open("POST", url);
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
         xhr.onreadystatechange = () => {
-            if (xhr.readyState === 4 && (xhr.status >= 200 && xhr.status <= 207)) {
-                // let httpStatus = xhr.statusText;
-                let response = xhr.responseText;
-                console.log(`Post 接收: ${response}`);
-                try {
-                    this.emit(msg_name + "_ret", JSON.parse(response));
-                } catch (e) {
-                    console.log(e);
+            if (xhr.readyState === 4) {
+                if (xhr.status >= 200 && xhr.status <= 207) {
+                    // let httpStatus = xhr.statusText;
+                    let response = xhr.responseText;
+                    console.log(`Post 接收: ${response}`);
+                    try {
+                        this.emit(msg_name + "_ret", JSON.parse(response));
+                    } catch (e) {
+                        this.emit(msg_name + "_error_ret");
+                        console.log(e);
+                    }
+                } else {
+                    this.emit(msg_name + "_error_ret");
                 }
+            }
+        };
+        xhr.onerror = () => {
+            if (cc.sys.isNative) {
+                this.emit(msg_name + "_error_ret");
+            }
+        };
+        xhr.ontimeout = () => {
+            if (cc.sys.isNative) {
+                this.emit(msg_name + "_error_ret");
             }
         };
         xhr.send(data);
