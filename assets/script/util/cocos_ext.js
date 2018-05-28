@@ -67,7 +67,7 @@ cocos_ext.set_label_text_with_outline = function (label, text, color, outline_co
 cocos_ext.set_label_text_with_quality = function (label, text, quality) {
     if (label.getComponent(cc.LabelOutline)) {
         this.set_label_text_with_outline(label, text, constant.FONT_QUALITY_COLOR[quality], constant.FONT_OUTLINE_QUALITY_COLOR[quality]);
-    }else {
+    } else {
         this.set_label_text(label, text, constant.FONT_QUALITY_COLOR[quality]);
     }
 };
@@ -103,8 +103,41 @@ cocos_ext.set_sprite_frame = function (sprite, sprite_frame) {
     sprite.getComponent(cc.Sprite).spriteFrame = sprite_frame;
 };
 
+/**
+ * 异步设置 spirte sprite_frame
+ * @param {*} sprite 
+ * @param {*} file_path 
+ */
+cocos_ext.set_sprite_frame_asyn = function (sprite, file_path) {
+    cc.loader.loadRes(file_path, function (err, texture2d) {
+        if (err) {
+            cc.warn(err.message);
+            return;
+        }
+        sprite.getComponent(cc.Sprite).spriteFrame = new cc.SpriteFrame(texture2d);
+    });
+};
+
 cocos_ext.set_sprite_texture = function (sprite, texture2d) {
     sprite.getComponent(cc.Sprite).spriteFrame = new cc.SpriteFrame(texture2d);
+};
+
+/**
+ * 设置 button 可用
+ * @param button 
+ * @param enable 
+ */
+cocos_ext.set_button_enable = function (button, enable) {
+    button.getComponent(cc.Button).interactable = enable;
+};
+
+/**
+ * 设置 button 数据
+ * @param {} button 
+ * @param {} data 
+ */
+cocos_ext.set_button_data = function (button, data) {
+    button.getComponent(cc.Button).clickEvents[0].customEventData = data;
 };
 
 /**
@@ -216,6 +249,15 @@ cocos_ext.swallow_touch_with_region = function (node, bg_node, cb) {
         }
         event.stopPropagation();
     });
+};
+
+/**
+ * 播放动画
+ * @param {*} node 
+ * @param {*} animation_name 
+ */
+cocos_ext.play_animation = function (node, animation_name) {
+    node.getComponent(cc.Animation).play(animation_name);
 };
 
 module.exports = cocos_ext;

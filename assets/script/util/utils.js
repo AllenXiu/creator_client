@@ -257,9 +257,9 @@ utils.get_time_str = function (ts,_isSimple) {
     let hh = parseInt(ts / 60 / 60, 10);//计算剩余的小时数
     let mm = parseInt(ts / 60 % 60, 10);//计算剩余的分钟数
     let ss = parseInt(ts % 60, 10);//计算剩余的秒数
-    let str = _isSimple ? "" : utils._check_time(hh) + ":";
-    str += utils._check_time(mm) + ":" + utils._check_time(ss);
-    return  str
+    let str = _isSimple ? "" : _check_time(hh) + ":";
+    str += _check_time(mm) + ":" + _check_time(ss);
+    return str;
 };
 
 /**
@@ -310,4 +310,7 @@ utils.format_seconds = function (a) {
     }
 };
 
+utils.prefix0 = function (num, length) {
+    return ("0000000000000000" + num).substr(-length);
+};
 module.exports = utils;

@@ -9,6 +9,7 @@
 let constant = require("constant");
 let ui = require("ui");
 let res = require("res");
+let download = require("download");
 
 cc.Class({
     extends: cc.Component,
@@ -24,6 +25,7 @@ cc.Class({
                 },
             }),
         },
+        ui_icons: [cc.SpriteAtlas],
     },
 
     // use this for initialization
@@ -39,6 +41,7 @@ cc.Class({
             }
         });
 
+        download.load_atlas(this.ui_icons);
         this._register_handler();
     },
 
